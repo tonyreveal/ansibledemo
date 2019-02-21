@@ -1,0 +1,65 @@
+---
+- name: Conf new Linux host as webserver
+  hosts: all
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Add new host to in-memory inventory
+      add_host:
+        hostname: "{{ new_host }}"
+        ansible_ssh_host: "{{ new_host_ip }}"
+        ansible_ssh_port: 22
+        state: latest
+
+    - name: Apply template to website
+      template:
+        src: templates/index.html.j2
+        dest: /var/www/html/
+        owner: tony
+        group: www-data
+        mode: 0644
+      delegate_to: "{{ new_host }}"
+
+    - name:
+      notify: start_httpd
+      delegate_to: "{{ new_host }}"
+
+    - name: Install firewalld
+      yum:
+        name: firewalld
+        state: latest
+      delegate_to: "{{ new_host }}"
+
+    - name: Allow ports in firewall
+      firewalld:
+        port: 80
+        immediate: yes
+        permanent: yes
+        state: enabled
+      delegate_to: "{{ new_host }}"
+
+    - name: Start firewall service
+      notify: start_firewall
+      delegate_to: "{{ new_host }}"
+
+    - name: Test website
+      shell: "curl http://{{ new_host_ip }}"
+      register: http_result
+      delegate_to: "{{ new_host }}"
+
+    - name: Display output from curl command
+      debug:
+        var: http_result
+
+  handlers:
+    - name: start_httpd
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: start_firewalld
+      service:
+        name: firewalld
+        state: started
+        enabled: yes
