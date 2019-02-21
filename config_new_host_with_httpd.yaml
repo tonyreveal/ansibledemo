@@ -6,8 +6,8 @@
   tasks:
     - name: Add new host to in-memory inventory
       add_host:
-        hostname: "{{ new_host }}"
-        ansible_ssh_host: "{{ new_host_ip }}"
+        hostname: "{{ provisioned_host }}"
+        ansible_ssh_host: "{{ ip_address }}"
         ansible_ssh_port: 22
         state: latest
 
@@ -18,17 +18,17 @@
         owner: tony
         group: www-data
         mode: 0644
-      delegate_to: "{{ new_host }}"
+      delegate_to: "{{ provisioned_host }}"
 
     - name:
       notify: start_httpd
-      delegate_to: "{{ new_host }}"
+      delegate_to: "{{ provisioned_host }}"
 
     - name: Install firewalld
       yum:
         name: firewalld
         state: latest
-      delegate_to: "{{ new_host }}"
+      delegate_to: "{{ provisioned_host }}"
 
     - name: Allow ports in firewall
       firewalld:
@@ -36,16 +36,16 @@
         immediate: yes
         permanent: yes
         state: enabled
-      delegate_to: "{{ new_host }}"
+      delegate_to: "{{ provisioned_host }}"
 
     - name: Start firewall service
       notify: start_firewall
-      delegate_to: "{{ new_host }}"
+      delegate_to: "{{ provisioned_host }}"
 
     - name: Test website
-      shell: "curl http://{{ new_host_ip }}"
+      shell: "curl http://{{ ip_address }}"
       register: http_result
-      delegate_to: "{{ new_host }}"
+      delegate_to: "{{ provisioned_host }}"
 
     - name: Display output from curl command
       debug:
