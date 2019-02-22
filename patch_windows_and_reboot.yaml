@@ -1,0 +1,13 @@
+---
+- name: Patch Windows Servers
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Install updates
+      win_updates:
+        category_names:
+          - CritialUpdates
+          - SecurityUpdates
+        reboot: yes
+        reboot_timeouot: 30
+        state: installed
