@@ -6,7 +6,7 @@
     - name: Install updates
       win_updates:
         category_names:
-          - CritialUpdates
+          - CriticalUpdates
           - SecurityUpdates
         reboot: yes
         reboot_timeouot: 30
