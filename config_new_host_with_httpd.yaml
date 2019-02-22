@@ -1,14 +1,22 @@
 ---
 - name: Conf new Linux host as webserver
-  hosts: all
+  hosts: VMs
   gather_facts: no
   become: yes
   tasks:
-    - name: Add new host to in-memory inventory
-      add_host:
-        hostname: "{{ provisioned_host }}"
-        ansible_ssh_host: "{{ ip_address }}"
-        ansible_ssh_port: 22
+    - name: Update vCenter inventory
+      uri:
+        url: http://tower.texasroadracing.com/api/v2/inventory_sources/21/update
+        method: POST
+        user: "admin"
+        password: "Dominate64"
+        force_basic_auth: yes
+        validate_certs: no
+      delegate_to: localhost
+
+    - name: Install httpd on server
+      yum:
+        name: httpd
         state: latest
 
     - name: Apply template to website

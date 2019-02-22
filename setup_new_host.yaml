@@ -1,0 +1,56 @@
+---
+- name: Conf new Linux host as webserver
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Upgrade all packages
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Install httpd
+      yum:
+        name: httpd
+        state: latest
+
+    - name: Start httpd
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: Apply template to website
+      template:
+        src: templates/index.html.j2
+        dest: /var/www/html/index.html
+        owner: tony
+        group: apache
+        mode: 0644
+
+    - name: Install firewalld
+      yum:
+        name: firewalld
+        state: latest
+
+    - name: Start firewalld
+      service:
+        name: firewalld
+        state: started
+        enabled: yes
+
+    - name: Allow ports in firewall
+      firewalld:
+        service: http
+        immediate: yes
+        permanent: yes
+        state: enabled
+
+    - name: Test website
+      uri:
+        url:  "http://{{ ip_address }}"
+        return_content: yes
+      register: http_result
+
+    - name: Display output from curl command
+      debug:
+        var: http_result
