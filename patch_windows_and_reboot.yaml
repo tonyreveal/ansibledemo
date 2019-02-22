@@ -2,6 +2,8 @@
 - name: Patch Windows Servers
   hosts: all
   gather_facts: no
+  vars_files:
+    - vars/windowswhitelist.yaml
   tasks:
     - name: Install updates
       win_updates:
@@ -11,3 +13,5 @@
         reboot: yes
         reboot_timeouot: 30
         state: installed
+        whitelist: "{{ item }}"
+      with_items: "{{ whitelist_patches }}"
