@@ -1,0 +1,5 @@
+whitelist_patches:
+  - KB12345
+  - KB23456
+  - KB98765
+  - KB56789
