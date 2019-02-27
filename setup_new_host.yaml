@@ -48,9 +48,10 @@
     - name: Test website
       uri:
         url:  "http://{{ ip_address }}"
+        method: GET
         return_content: yes
       register: http_result
 
-    - name: Display output from curl command
+    - name: Display output from website test
       debug:
         var: http_result

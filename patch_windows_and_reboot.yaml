@@ -2,16 +2,18 @@
 - name: Patch Windows Servers
   hosts: all
   gather_facts: no
-  vars_files:
-    - vars/windowswhitelist.yaml
   tasks:
+    - name: Warn logged in users of impending reboot
+      win_msg:
+        display_seconds: 60
+        wait: no
+        msg: "Windows Updates are being installed.  Please save any work and log off as the server will reboot when complete."
+
     - name: Install updates
       win_updates:
         category_names:
           - CriticalUpdates
           - SecurityUpdates
         reboot: yes
-        reboot_timeouot: 30
+        reboot_timeouot: 60
         state: installed
-        whitelist: "{{ item }}"
-      with_items: "{{ whitelist_patches }}"
