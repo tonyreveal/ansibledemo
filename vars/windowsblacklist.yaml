@@ -1,0 +1,5 @@
+blacklist_patches:
+  - KB65432
+  - KB56789
+  - KB87654
+  - KB45678
