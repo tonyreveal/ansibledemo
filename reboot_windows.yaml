@@ -1,0 +1,18 @@
+---
+- name: Reboot AD Servers
+  hosts: ldap
+  gather_facts: no
+  tasks:
+    - name: Reboot server
+      win_reboot:
+        connect_timeout: 5 #how long to wait for a successful WinRM connection before trying to begin
+        msg: "This server will reboot in 1 minute.  Please save any work and log off."
+        post_reboot_delay: 60 #after reboot, wait this long before continuing to next step
+        pre_reboot_delay: 60 #wait this long before rebooting
+        reboot_timeout: 300 #wait this long for server to re-appear on network and respond to a test command
+      ignore_errors: yes
+      register: reboot_results
+
+    - name: Check if reboot successful
+      debug:
+        var: reboot_results

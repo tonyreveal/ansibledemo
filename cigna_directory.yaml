@@ -1,0 +1,78 @@
+---
+- name: Examples for Cigna Directory team
+  hosts: ldapservers
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Check if file exists
+      stat:
+        path: /var/log/tower/tower.log
+      register: filestat
+
+    - name: Fail if file does not exist
+      fail:
+        msg: File does not exist
+      when: filestat.stat.exists == false
+
+# Use copy module if copying the file from the tower server or some other source (like NFS)
+    - name: Copy file to target host
+      copy:
+        src: /nfs/archive.tar.gz
+        dest: /tmp/archive.tar.gz
+        owner: someuser
+        group: somegroup
+        mode: 0644
+
+# Or use get_url module if you want to download the file from a web server
+    - name: Get file from web server
+      get_url:
+        url: http://www.someserver.com/files/archive.tar.gz
+        dest: /tmp/archive.tar.gz
+        owner: someuser
+        group: somegroup
+        mode: "u=rw,g=r,o=r"
+
+    - name: Extract files from archive
+      unarchive:
+        src: /tmp/archive.tar.gz
+        dest: /tmp/extracted/
+        remote_src: yes
+
+# perform silent install
+    - name: Perform install
+      shell: /tmp/extracted/setup.sh
+      args:
+        chdir: /path/to/dir
+        creates: /var/logs/install.log
+        executable: /bin/bash        
+
+# run command to import conifg
+# wondering if this could be done with a template?
+# need more info on what is being imported and how
+    - name: Import configuration
+      shell: /etc/some_command
+      args:
+        chdir: /path/to/dir
+        executable: /bin/bash
+
+    - name: Alt import configuration as template
+      template:
+        src: ./oud.conf.j2
+        dest: /opt/oracle/oud.conf
+        owner: someuser
+        group: somegroup
+        mode: "u=rw,g=r,o=r"
+
+
+# cli commands to enable SSL, etc
+# If templating configuration settings like the previous action
+# you could probably include these additional settings in your templating
+    - name: Configure other settings
+      shell: /etc/some_command
+      args:
+        chdir: /path/to/dir
+        executable: /bin/bash
+
+# health checks, verify service running, etc
+
+# perform validation

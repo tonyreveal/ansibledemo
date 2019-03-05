@@ -17,3 +17,10 @@
         reboot: yes
         reboot_timeouot: 60
         state: installed
+      ignore_errors: yes
+      register: updates_results
+
+    - name: Check if all updates installed
+      when: updates_results.failed_update_count != 0
+      debug:
+        msg: "Not all updates installed.  {{ updates_results.failed_update_count }} updates failed to install."
