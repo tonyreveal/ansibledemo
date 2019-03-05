@@ -1,6 +1,6 @@
 ---
 - name: Reboot AD Servers
-  hosts: ldap
+  hosts: all
   gather_facts: no
   tasks:
     - name: Reboot server
