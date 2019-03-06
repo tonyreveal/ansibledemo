@@ -1,13 +1,26 @@
 ---
 - name: Patch Windows Servers
-  hosts: all
-  gather_facts: no
+  hosts: Windows
   tasks:
     - name: Warn logged in users of impending reboot
       win_msg:
         display_seconds: 60
         wait: no
         msg: "Windows Updates are being installed.  Please save any work and log off as the server will reboot when complete."
+
+    - name: Disable F5 Pool Member
+      bigip_pool_member:
+        server: lb.cigna.com
+        user: "{{ lookup('env', 'F5_USER') }}"
+        password: "{{ lookup('env', 'F5_PASSWORD') }}"
+        state: disabled
+        pool: middleware-app1
+        partition: Common
+        host: "{{ ansible_default_ipv4['address'] }}"
+        port: 80
+      delegate_to: localhost
+      notify:
+        - stop w3svc
 
     - name: Install updates
       win_updates:
@@ -24,3 +37,23 @@
       when: updates_results.failed_update_count != 0
       debug:
         msg: "Not all updates installed.  {{ updates_results.failed_update_count }} updates failed to install."
+
+    - name: Enable F5 Pool Member
+      when: updates_results.failed_update_count == 0
+      bigip_pool_member:
+        server: lb.cigna.com
+        user: "{{ lookup('env', 'F5_USER') }}"
+        password: "{{ lookup('env', 'F5_PASSWORD') }}"
+        state: enabled
+        pool: middleware-app1
+        partition: Common
+        host: "{{ ansible_default_ipv4['address'] }}"
+        port: 80
+      delegate_to: localhost
+
+  handlers:
+    - name: stop w3svc
+      win_service:
+        name: w3svc
+        force_dependent_services: yes
+        state: stopped
