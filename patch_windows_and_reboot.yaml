@@ -19,8 +19,6 @@
         host: "{{ ansible_default_ipv4['address'] }}"
         port: 80
       delegate_to: localhost
-      notify:
-        - stop w3svc
 
     - name: Install updates
       win_updates:
@@ -50,10 +48,3 @@
         host: "{{ ansible_default_ipv4['address'] }}"
         port: 80
       delegate_to: localhost
-
-  handlers:
-    - name: stop w3svc
-      win_service:
-        name: w3svc
-        force_dependent_services: yes
-        state: stopped
