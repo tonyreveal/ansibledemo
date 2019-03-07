@@ -44,7 +44,7 @@
       args:
         chdir: /path/to/dir
         creates: /var/logs/install.log
-        executable: /bin/bash        
+        executable: /bin/ksh        
 
 # run command to import conifg
 # wondering if this could be done with a template?
